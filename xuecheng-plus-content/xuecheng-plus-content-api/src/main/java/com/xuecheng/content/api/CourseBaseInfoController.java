@@ -65,6 +65,7 @@ public class CourseBaseInfoController {
         return courseBaseService.getCourseBaseInfo(courseId);
     }
 
+
     @ApiOperation("课程修改")
     @PutMapping
     public CourseBaseInfoDto modifyCourseBase(@RequestBody @Validated EditCourseDto editCourseDto) {

@@ -39,3 +39,55 @@ Content-Type: application/json
   "description": "异常测试",
   "objectives": ""
 }
+
+
+### 查询某个课程的课程计划
+GET {{content_host}}/content/teachplan/82/tree-nodes
+
+
+### 新增课程计划--章
+POST {{content_host}}/content/teachplan
+Content-Type: application/json
+
+{
+  "courseId" : 74,
+  "parentid": 0,
+  "grade" : 1,
+  "pname" : "新章名称 [点击修改]"
+}
+
+### 新增课程计划--节,从数据库找到第一级的课程计划id向其下边添加计划
+POST {{content_host}}/content/teachplan
+Content-Type: application/json
+
+{
+  "courseId" : 74,
+  "parentid": 247,
+  "grade" : 2,
+  "pname" : "小节名称 [点击修改]"
+}
+
+### 课程课程计划,需要从数据库找到修改的课程计划id
+POST {{content_host}}/content/teachplan
+Content-Type: application/json
+
+{
+  "changeDate" : null,
+  "courseId" : 74,
+  "coursePubId" : null,
+  "createDate" : null,
+  "ctlBarShow" : false,
+  "ctlEditTitle" : true,
+  "description" : null,
+  "endTime" : null,
+  "grade" : 2,
+  "id" : 249,
+  "isPreview" : "1",
+  "mediaType" : null,
+  "orderby" : 5,
+  "parentid" : 247,
+  "pname" : "第4-1小节 哈哈哈 ",
+  "startTime" : null,
+  "status" : null,
+  "timelength" : null
+}

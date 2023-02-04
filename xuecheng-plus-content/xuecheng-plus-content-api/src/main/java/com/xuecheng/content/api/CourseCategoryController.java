@@ -15,7 +15,7 @@ import java.util.List;
  * @ClassName CourseCategoryController
  * @Date 2023/1/31 15:01
  * @Author diane
- * @Description TODO
+ * @Description 课程分类api
  * @Version 1.0
  */
 @RestController
