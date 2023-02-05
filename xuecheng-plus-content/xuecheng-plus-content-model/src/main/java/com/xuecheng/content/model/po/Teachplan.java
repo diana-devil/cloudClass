@@ -1,9 +1,6 @@
 package com.xuecheng.content.model.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -78,8 +75,10 @@ public class Teachplan implements Serializable {
     private Long coursePubId;
 
     /**
+     * 逻辑删除——无需写在配置文件中
      * 状态（1正常  0删除）
      */
+    @TableLogic(value = "1",delval = "0")//默认是1 1表示未删除，0表示删除
     private Integer status;
 
     /**

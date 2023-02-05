@@ -91,3 +91,6 @@ Content-Type: application/json
   "status" : null,
   "timelength" : null
 }
+
+### 删除课程计划
+DELETE {{content_host}}/content/teachplan/268

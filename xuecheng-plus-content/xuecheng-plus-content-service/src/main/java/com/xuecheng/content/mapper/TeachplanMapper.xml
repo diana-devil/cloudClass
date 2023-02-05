@@ -69,9 +69,9 @@
             m1.media_id mediaId
 
         from teachplan one
-                 left join teachplan two on one.id = two.parentid
-                 left join teachplan_media m1 on m1.teachplan_id = two.id
-        where one.parentid = 0 and one.course_id=#{value}
+                 left join teachplan two on (one.id = two.parentid and two.status = 1)
+                 left join teachplan_media m1 on (m1.teachplan_id = two.id and two.status = 1)
+        where one.parentid = 0 and one.course_id=#{value} and one.status = 1
         order by one.orderby,
                  two.orderby
     </select>

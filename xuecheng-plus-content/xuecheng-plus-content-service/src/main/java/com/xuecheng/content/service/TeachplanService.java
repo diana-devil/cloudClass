@@ -27,4 +27,10 @@ public interface TeachplanService extends IService<Teachplan> {
      * @param saveTeachplanDto 课程计划信息
      */
     void saveTeachplan(SaveTeachplanDto saveTeachplanDto);
+
+    /**
+     *  删除课程计划
+     * @param id 课程计划id
+     */
+    void removeTeachPlan(Long id);
 }
