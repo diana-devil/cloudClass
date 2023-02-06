@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 设置状态响应码 500
     public RestErrorResponse customException(XueChengPlusException e) {
         String errMessage = e.getErrMessage();
-        log.error("【系统异常】{}",errMessage,e);
+        log.error("【业务异常】{}",errMessage,e);
         return new RestErrorResponse(errMessage);
     }
 
@@ -51,6 +52,17 @@ public class GlobalExceptionHandler {
         });
         log.error(errMsg.toString());
         return new RestErrorResponse(errMsg.toString());
+    }
+
+
+    @ResponseBody
+    // 捕获 数据库异常
+    @ExceptionHandler(value = SQLException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public RestErrorResponse sqlException(SQLException sqlException) {
+        String errMessage = sqlException.getMessage();
+        log.error("【数据库执行异常】{}",errMessage,sqlException);
+        return new RestErrorResponse(errMessage);
     }
 
 

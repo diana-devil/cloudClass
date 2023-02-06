@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * 课程-教师关系表
@@ -50,7 +50,7 @@ public class CourseTeacher implements Serializable {
     /**
      * 创建时间
      */
-    private Date createDate;
+    private LocalDate createDate;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
