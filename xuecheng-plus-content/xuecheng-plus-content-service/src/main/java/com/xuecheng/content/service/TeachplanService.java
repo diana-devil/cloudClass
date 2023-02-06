@@ -33,4 +33,11 @@ public interface TeachplanService extends IService<Teachplan> {
      * @param id 课程计划id
      */
     void removeTeachPlan(Long id);
+
+    /**
+     *  移动课程计划
+     * @param moveType 移动类型
+     * @param id 课程计划id
+     */
+    void moveTeachPlan(String moveType, Long id);
 }

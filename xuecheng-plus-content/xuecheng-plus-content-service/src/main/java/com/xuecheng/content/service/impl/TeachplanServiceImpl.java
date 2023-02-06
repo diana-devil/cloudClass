@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -66,17 +68,21 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
         // 新增课程计划,记得要修改 orderby 属性
         //  每次新增 大节或者小节的时候 orderby 都应该 比起之前的 +1
         if (id == null) {
-            // 获取现有的 orderby 大小
-            Long courseId = teachplanDto.getCourseId();
-            Long parentid = teachplanDto.getParentid();
-            LambdaQueryWrapper<Teachplan> query = new LambdaQueryWrapper<>();
-            query.eq(Teachplan::getCourseId, courseId).eq(Teachplan::getParentid, parentid);
-            Integer count = teachplanMapper.selectCount(query);
+            // 获取现有的 最大的 orderby 大小 ,正序排列
+            List<Teachplan> teachplans = getSameGradeTeachplans(teachplanDto.getCourseId(), teachplanDto.getParentid(), 1);
+            Integer orderby;
+            if (teachplans.size() > 0) {
+                orderby = teachplans.get(teachplans.size() - 1).getOrderby();
+            } else { // 之前没有小节，第一次添加
+                orderby = 0;
+            }
+            log.info("当前最大的orderby为{}", orderby);
+
             // 属性copy
             Teachplan teachplan = new Teachplan();
             BeanUtils.copyProperties(teachplanDto, teachplan);
             // 修改 orderby 字段值
-            teachplan.setOrderby(count + 1);
+            teachplan.setOrderby(orderby + 1);
             save(teachplan);
         } // 修改课程计划
         else {
@@ -91,12 +97,33 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
 
     }
 
+    /**
+     * 查询同级别的 课程计划
+     * @param courseId 课程id
+     * @param parentId 父课程id
+     * @param flag 排序方式 1表示正序排列；0表示倒序排列
+     * @return 按照orderby字段排好序之后的，课程计划列表
+     */
+    private List<Teachplan> getSameGradeTeachplans(Long courseId, Long parentId, int flag) {
+        LambdaQueryWrapper<Teachplan> query = new LambdaQueryWrapper<>();
+        query.eq(Teachplan::getCourseId, courseId).eq(Teachplan::getParentid, parentId);
+        if (flag == 1) {
+            query.orderByAsc(Teachplan::getOrderby);
+        } else if (flag == 0) {
+            query.orderByDesc(Teachplan::getOrderby);
+        } else {
+            XueChengPlusException.exce(CommonError.UNKOWN_ERROR);
+        }
+        return teachplanMapper.selectList(query);
+    }
+
 
     /**
      * 删除课程计划
      *    只有当课程状态是未提交时，方可删除
      *    删除第一级别的章时要求章下边没有小节方可删除。
      *    删除第二级别的小节的同时需要将其它关联的视频信息也删除。
+     *    要修改课程的orderby
      * @param id 课程计划id
      */
     @Override
@@ -130,6 +157,7 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
             teachplanMediaMapper.delete(query);
             // 2.2 删除课程计划表
             removeById(id);
+
         }
         // 3. 第一节课程，查询其下的二级课程剩余数，当剩余数为0时，方可删除；否则，抛出异常
         else if (grade == 1) {
@@ -150,6 +178,78 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
 
 
 
+    }
+
+
+    /**
+     * 移动课程计划
+     *      向上移动(moveup)表示和上边的课程计划交换位置，将两个课程计划的排序字段值交换。
+     *      向下移动(movedown)表示和下边的课程计划交换位置，将两个课程计划的排序字段值交换。
+     * @param moveType 移动类型
+     * @param id 课程计划id
+     */
+    @Override
+    public void moveTeachPlan(String moveType, Long id) {
+        // 获取当前 orderby值
+        Teachplan teachplan = teachplanMapper.selectById(id);
+        if (teachplan == null) {
+            XueChengPlusException.exce(CommonError.UNKOWN_ERROR);
+        }
+        Long courseId = teachplan.getCourseId();
+        Long parentid = teachplan.getParentid();
+        List<Teachplan> teachplans = new ArrayList<>();
+
+        // 向上移动
+        if ("moveup".equals(moveType)) {
+            // 获取当前同级别的 课程计划  降序排列
+            teachplans = getSameGradeTeachplans(courseId, parentid, 0);
+        }
+        // 向下移动
+        else if ("movedown".equals(moveType)) {
+            // 获取当前同级别的 课程计划  升序排列
+            teachplans = getSameGradeTeachplans(courseId, parentid, 1);
+        }
+        // 其他情况
+        else {
+            XueChengPlusException.exce(CommonError.PARAMS_ERROR);
+        }
+
+        // 同级别课程计划小于等于1，不做处理
+        if (teachplans.size() <= 1) {
+            return;
+        }
+        // 遍历列表,找到 当前课程计划，和其下面的课程计划
+        Iterator<Teachplan> iterator = teachplans.iterator();
+        while(iterator.hasNext()) {
+            Teachplan next = iterator.next();
+            if (next.getId().equals(id)) {
+                if (!iterator.hasNext()) {
+                    XueChengPlusException.exce("已经在最边缘，无需移动！");
+                }
+                // 交换 两个 课程计划的 orderby
+                swapTeachplan(next, iterator.next());
+            }
+        }
+    }
+
+
+    /**
+     *  交换两个课程计划的orderby
+     * @param next 课程计划1
+     * @param snext 课程计划2
+     */
+    @Transactional
+    public void swapTeachplan(Teachplan next, Teachplan snext) {
+        Integer orderby = next.getOrderby();
+        Integer sorderby = snext.getOrderby();
+        next.setOrderby(sorderby);
+        snext.setOrderby(orderby);
+        // 更新数据库
+        boolean b = updateById(next);
+        boolean b1 = updateById(snext);
+        if (!(b && b1)) {
+            XueChengPlusException.exce(CommonError.UNKOWN_ERROR);
+        }
     }
 }
 
