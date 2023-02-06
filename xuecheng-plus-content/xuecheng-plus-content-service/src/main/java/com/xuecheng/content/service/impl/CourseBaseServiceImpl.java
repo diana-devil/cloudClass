@@ -162,7 +162,8 @@ public class CourseBaseServiceImpl extends ServiceImpl<CourseBaseMapper, CourseB
 
         //收费规则 校验
         chargeCheck(dto, courseMarketNew);
-//        courseMarketNew.setId(courseId);
+        // 这里必须要设置id, 因为要保持 市场表和基本表 id一致
+        courseMarketNew.setId(courseId);
 
 
         //插入课程营销信息
