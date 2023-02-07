@@ -8,6 +8,18 @@ Content-Type: application/json
   "publishStatus": "203001"
 }
 
+### 课程查询接口  通过网关查询
+POST {{gateway_host}}/content/course/list?pageNo=1&pageSize=2
+Content-Type: application/json
+
+{
+  "auditStatus": "202004",
+  "courseName": "java",
+  "publishStatus": "203001"
+}
+
+
+
 <> 2023-01-31T113545.200.json
 <> 2023-01-31T113358.404.html
 
