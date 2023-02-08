@@ -1,6 +1,7 @@
 package com.xuecheng.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xuecheng.content.model.dto.BindTeachplanMediaDto;
 import com.xuecheng.content.model.po.TeachplanMedia;
 
 
@@ -11,4 +12,17 @@ import com.xuecheng.content.model.po.TeachplanMedia;
 */
 public interface TeachplanMediaService extends IService<TeachplanMedia> {
 
+
+    /**
+     * 教学计划绑定媒资信息
+     * @param bindTeachplanMediaDto 绑定信息dto
+     */
+    void associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto);
+
+    /**
+     *  删除绑定的关系
+     * @param teachplanId 课程计划id
+     * @param mediaId  媒资id
+     */
+    void removeAssociationMedia(Long teachplanId, String mediaId);
 }

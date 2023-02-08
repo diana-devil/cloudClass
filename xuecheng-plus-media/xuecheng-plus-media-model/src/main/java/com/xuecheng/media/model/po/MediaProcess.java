@@ -59,4 +59,16 @@ public class MediaProcess implements Serializable {
     private String url;
 
 
+    /**
+     * minio 文件地址
+     * 文件路径
+     */
+    private String filePath;
+
+    /**
+     * 错误信息
+     */
+    private String errormsg;
+
+
 }

@@ -48,6 +48,7 @@ public interface MediaFileService {
   *  将文件信息 写入数据库
   *
   *  将方法 写成接口，可以通过注入自己的方式，使事务生效
+  * @param contentType 文件传输类型
   * @param companyId 机构id
   * @param bucket 桶的名称
   * @param uploadFileParamsDto 文件上传 参数信息
@@ -55,7 +56,7 @@ public interface MediaFileService {
   * @param minioFileName 拼接文件名称 minio用的
   * @return 整理好的文件信息
   */
- MediaFiles addMediaFilesToDb(Long companyId, String bucket, UploadFileParamsDto uploadFileParamsDto, String fileMd5, String minioFileName);
+ MediaFiles addMediaFilesToDb(String contentType, Long companyId, String bucket, UploadFileParamsDto uploadFileParamsDto, String fileMd5, String minioFileName);
 
  /**
   * 文件上传前检查文件
@@ -91,4 +92,13 @@ public interface MediaFileService {
   * @return
   */
  RestResponse mergechunks(Long companyId,String fileMd5,int chunkTotal,UploadFileParamsDto uploadFileParamsDto);
+
+ /**
+  * 通过id 获取 媒资 信息
+  *   key 这里不用直接用 RestResponse 返回类型， 要注意service 和controller层的区别
+  *   service 方法注意通用性
+  * @param id 文件id
+  * @return 媒资信息，
+  */
+ MediaFiles getFileById(String id);
 }

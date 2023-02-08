@@ -1,7 +1,9 @@
 package com.xuecheng.content.api;
 
+import com.xuecheng.content.model.dto.BindTeachplanMediaDto;
 import com.xuecheng.content.model.dto.SaveTeachplanDto;
 import com.xuecheng.content.model.dto.TeachplanDto;
+import com.xuecheng.content.service.TeachplanMediaService;
 import com.xuecheng.content.service.TeachplanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -26,6 +28,9 @@ public class TeachplanController {
 
     @Resource
     private TeachplanService teachplanService;
+
+    @Resource
+    private TeachplanMediaService teachplanMediaService;
 
     @GetMapping("/{courseId}/tree-nodes")
     //用在请求的方法上，说明方法的用途、作用
@@ -54,6 +59,20 @@ public class TeachplanController {
     @PostMapping("/{moveType}/{id}")
     public void moveTeachPlan(@PathVariable String moveType, @PathVariable Long id) {
         teachplanService.moveTeachPlan(moveType, id);
+    }
+
+
+
+    @ApiOperation("教学计划绑定媒资信息")
+    @PostMapping("/association/media")
+    public void associationMedia(@RequestBody BindTeachplanMediaDto bindTeachplanMediaDto) {
+        teachplanMediaService.associationMedia(bindTeachplanMediaDto);
+    }
+
+    @ApiOperation("删除教学计划绑定的媒资信息")
+    @DeleteMapping("/association/media/{teachplanId}/{mediaId}")
+    public void removeAssociationMedia(@PathVariable Long teachplanId, @PathVariable String mediaId) {
+        teachplanMediaService.removeAssociationMedia(teachplanId, mediaId);
     }
 
 

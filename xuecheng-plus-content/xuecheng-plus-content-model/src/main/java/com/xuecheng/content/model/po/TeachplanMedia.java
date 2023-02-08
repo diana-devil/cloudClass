@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 
@@ -45,7 +45,7 @@ public class TeachplanMedia implements Serializable {
     /**
      * 
      */
-    private Date createDate;
+    private LocalDateTime createDate;
 
     /**
      * 创建人
