@@ -38,7 +38,7 @@ public class TeachplanController {
     // 用在请求的方法上，表示一组参数说明
     @ApiImplicitParam(value = "courseId",name = "课程基础Id值",required = true,dataType = "Long",paramType = "path")
     public List<TeachplanDto> getTreeNodes(@PathVariable Long courseId) {
-        return teachplanService.findTeachplayTree(courseId);
+        return teachplanService.findTeachplanTree(courseId);
     }
 
 

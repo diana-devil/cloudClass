@@ -65,12 +65,12 @@ public class MediaFilesController {
         if(contentType.contains("image")){
             //图片
             uploadFileParamsDto.setFileType("001001");
+            uploadFileParamsDto.setTags("课程图片");
         }else{
             //其它
             uploadFileParamsDto.setFileType("001003");
         }
         uploadFileParamsDto.setRemark("");
-        uploadFileParamsDto.setTags("课程图片");
         uploadFileParamsDto.setFilename(upload.getOriginalFilename());
         log.info("原始文件名称--{}", upload.getOriginalFilename());
         uploadFileParamsDto.setContentType(contentType);

@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 课程发布
@@ -109,12 +109,12 @@ public class CoursePublishPre implements Serializable {
     /**
      * 提交时间
      */
-    private Date createDate;
+    private LocalDateTime createDate;
 
     /**
      * 审核时间
      */
-    private Date auditDate;
+    private LocalDateTime auditDate;
 
     /**
      * 状态
@@ -134,12 +134,12 @@ public class CoursePublishPre implements Serializable {
     /**
      * 现价
      */
-    private Double price;
+    private Float price;
 
     /**
      * 原价
      */
-    private Double originalPrice;
+    private Float originalPrice;
 
     /**
      * 课程有效期天数

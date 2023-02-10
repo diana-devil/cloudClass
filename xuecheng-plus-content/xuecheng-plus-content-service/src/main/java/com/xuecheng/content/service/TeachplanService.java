@@ -20,7 +20,7 @@ public interface TeachplanService extends IService<Teachplan> {
      * @param courseId 课程id
      * @return 课程计划树型结构dto
      */
-    List<TeachplanDto> findTeachplayTree(Long courseId);
+    List<TeachplanDto> findTeachplanTree(Long courseId);
 
     /**
      *  修改或者新增课程计划

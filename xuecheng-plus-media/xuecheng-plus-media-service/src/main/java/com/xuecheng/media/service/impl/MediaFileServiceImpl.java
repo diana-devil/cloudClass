@@ -107,6 +107,7 @@ public class MediaFileServiceImpl implements MediaFileService {
 
  /**
   *  上传 小文件
+  *  将文件上传至 minio文件系统；将文件信息保存至数据库
   * @param companyId 机构id
   * @param uploadFileParamsDto 文件上传信息
   * @param bytes 文件字节数组
@@ -154,6 +155,7 @@ public class MediaFileServiceImpl implements MediaFileService {
   try {
    // 2. 上传文件至 minio
    addMediaFilesToMinIO(contentType, fileBucket, bytes, realFileName);
+   log.info("文件成功上传至minio文件系统");
 
    // 3.上传到数据库   key 事务问题
    // 使用this 对象调用，事务失效
@@ -163,6 +165,7 @@ public class MediaFileServiceImpl implements MediaFileService {
    // 解决方法2：利用AopContext 手动创建代理对象
    MediaFileService currentProxy = (MediaFileService) AopContext.currentProxy();
    MediaFiles mediaFiles = currentProxy.addMediaFilesToDb(contentType, companyId, fileBucket, uploadFileParamsDto, fileMd5, realFileName);
+   log.info("文件信息成功保存至数据库");
 
    // 4.准备返回数据
    UploadFileResultDto uploadFileResultDto = new UploadFileResultDto();
@@ -447,7 +450,7 @@ public class MediaFileServiceImpl implements MediaFileService {
    minioClient.putObject(putObjectArgs);
 
   } catch (Exception e) {
-   log.debug("上传文件失败{}", e.getMessage());
+   log.debug("addMediaFilesToMinIO-上传文件失败{}", e.getMessage());
    XueChengPlusException.exce("service -- 上传文件出错！");
   }
  }

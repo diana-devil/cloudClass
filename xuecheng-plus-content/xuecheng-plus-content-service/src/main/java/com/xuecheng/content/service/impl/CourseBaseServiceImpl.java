@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
+import static com.xuecheng.base.constants.DataDictionary.*;
+
 /**
 * @author 凉冰
 * @description 针对表【course_base(课程基本信息)】的数据库操作Service实现
@@ -138,10 +140,10 @@ public class CourseBaseServiceImpl extends ServiceImpl<CourseBaseMapper, CourseB
         CourseBase courseBaseNew = new CourseBase();
         //将填写的课程信息赋值给新增对象
         BeanUtils.copyProperties(dto,courseBaseNew);
-        //设置审核状态
-        courseBaseNew.setAuditStatus("202002");
-        //设置发布状态
-        courseBaseNew.setStatus("203001");
+        //设置审核状态 -- 未提交
+        courseBaseNew.setAuditStatus(AUDIT_UNCOMMITTED);
+        //设置发布状态  -- 未发布
+        courseBaseNew.setStatus(PUBLISH_NOT);
         //机构id
         courseBaseNew.setCompanyId(companyId);
         //添加时间
@@ -191,13 +193,13 @@ public class CourseBaseServiceImpl extends ServiceImpl<CourseBaseMapper, CourseB
         String charge = dto.getCharge();
         Float price = dto.getPrice();
         //收费课程必须写价格
-        if ("201001".equals(charge)) {
+        if (CHARGE_NOT_FREE.equals(charge)) {
             if (ObjectUtils.isEmpty(price) || price <= 0) {
                 throw new XueChengPlusException("收费课程价格不规范");
             }
         }
         // 免费课程 价格不能大于0
-        if ("201000".equals(charge)) {
+        if (CHARGE_FREE.equals(charge)) {
             if (ObjectUtils.isNotEmpty(price) && price > 0) {
                 throw new XueChengPlusException("免费课程价格不合理！");
             }

@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.xuecheng.base.constants.DataDictionary.AUDIT_UNCOMMITTED;
+
 /**
 * @author 凉冰
 * @description 针对表【teachplan(课程计划)】的数据库操作Service实现
@@ -49,7 +51,7 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
      * @return 课程计划树型结构dto
      */
     @Override
-    public List<TeachplanDto> findTeachplayTree(Long courseId) {
+    public List<TeachplanDto> findTeachplanTree(Long courseId) {
         return teachplanMapper.selectTreeNodes(courseId);
     }
 
@@ -144,7 +146,7 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
         }
         String auditStatus = courseBase.getAuditStatus();
         // 只有当课程是未提交时方可删除
-        if (!"202002".equals(auditStatus)) {
+        if (!AUDIT_UNCOMMITTED.equals(auditStatus)) {
             XueChengPlusException.exce("删除失败，课程审核状态是未提交时方可删除!");
         }
 
