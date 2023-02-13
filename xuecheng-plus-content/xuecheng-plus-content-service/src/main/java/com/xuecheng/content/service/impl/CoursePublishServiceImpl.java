@@ -291,6 +291,7 @@ public class CoursePublishServiceImpl extends ServiceImpl<CoursePublishMapper, C
         mediaServiceClient.upload(multipartFile,"course",courseId + ".html");
     }
 
+
     /**
      * 创建课程索引
      * @param courseId 课程id
@@ -312,6 +313,21 @@ public class CoursePublishServiceImpl extends ServiceImpl<CoursePublishMapper, C
             XueChengPlusException.exce("调用远程服务,创建课程索引失败");
         }
         return true;
+    }
+
+
+    /**
+     * 查询课程发布信息
+     * @param courseId 课程id
+     * @return
+     */
+    @Override
+    public CoursePublish getCoursePublish(Long courseId) {
+        CoursePublish coursePublish = getById(courseId);
+        if (coursePublish == null) {
+            XueChengPlusException.exce("课程发布信息为空！");
+        }
+        return coursePublish;
     }
 
 
@@ -345,6 +361,9 @@ public class CoursePublishServiceImpl extends ServiceImpl<CoursePublishMapper, C
         System.out.println(classpath);
         System.out.println(classpath2);
         System.out.println(locationPath);
+
+        log.info("111");
+        log.debug("111");
 
 
         // 中文解码

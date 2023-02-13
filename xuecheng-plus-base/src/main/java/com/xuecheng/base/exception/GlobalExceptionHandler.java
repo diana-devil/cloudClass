@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -33,6 +34,25 @@ public class GlobalExceptionHandler {
         log.error("【业务异常】{}",errMessage,e);
         return new RestErrorResponse(errMessage);
     }
+
+
+
+    @ResponseBody
+    @ExceptionHandler(AccessDeniedException.class)// 捕获没有权限异常
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public RestErrorResponse authException(Exception e) {
+
+        log.error("【系统权限异常】{}",e.getMessage(),e);
+        return new RestErrorResponse("没有操作此功能的权限");
+
+        // if(e.getMessage().equals("不允许访问")){
+        //     return new RestErrorResponse("没有操作此功能的权限");
+        // }
+        // return new RestErrorResponse(CommonError.UNKOWN_ERROR.getErrMessage());
+
+
+    }
+
 
 
     @ResponseBody
@@ -71,9 +91,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)  //捕获 其他异常
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 设置状态响应码 500
     public RestErrorResponse exception(Exception e) {
-        log.error("【系统异常】{}",e.getMessage(),e);
+        log.error("【全局系统异常】{}",e.getMessage(),e);
+
+        if(e.getMessage().equals("不允许访问")){
+            return new RestErrorResponse("没有操作此功能的权限");
+        }
+
         // 响应其他异常时， 异常信息均为  UNKOWN_ERROR== “执行过程异常，请重试。”
         return new RestErrorResponse(CommonError.UNKOWN_ERROR.getErrMessage());
+
     }
 
 

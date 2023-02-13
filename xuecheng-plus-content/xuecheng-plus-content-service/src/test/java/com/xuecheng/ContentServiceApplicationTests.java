@@ -44,7 +44,7 @@ class ContentServiceApplicationTests {
     void testCourseBaseService() {
         PageParams pageParams = new PageParams(1, 10);
         QueryCourseParamsDto queryCourseParams = new QueryCourseParamsDto();
-        PageResult<CourseBase> result = courseBaseService.queryCourseBaseList(pageParams, queryCourseParams);
+        PageResult<CourseBase> result = courseBaseService.queryCourseBaseList(pageParams, queryCourseParams, 1L);
         Assertions.assertNotNull(result);
         System.out.println(result);
     }

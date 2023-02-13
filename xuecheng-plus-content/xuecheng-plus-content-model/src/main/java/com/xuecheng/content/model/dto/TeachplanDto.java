@@ -22,6 +22,6 @@ public class TeachplanDto extends Teachplan {
     TeachplanMedia teachplanMedia;
 
     //子结点
-    List teachPlanTreeNodes;
+    List<TeachplanDto> teachPlanTreeNodes;
 
 }

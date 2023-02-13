@@ -1,0 +1,7 @@
+### 申请验证码
+POST {{checkcode_host}}/checkcode/pic
+
+
+
+### 校验验证码
+POST {{checkcode_host}}/checkcode/verify?key=checkcode:9aaa461eb07e4c1d875ab7821c666a8c&code=UIGS

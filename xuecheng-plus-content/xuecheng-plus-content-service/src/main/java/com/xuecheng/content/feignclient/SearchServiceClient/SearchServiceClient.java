@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @Description 搜索服务远程调用
  * @Version 1.0
  */
-@FeignClient(value = "search")
+@FeignClient(value = "search", fallbackFactory = SearchServiceClientFallbackFactory.class)
 public interface SearchServiceClient {
     /**
      * 添加课程索引

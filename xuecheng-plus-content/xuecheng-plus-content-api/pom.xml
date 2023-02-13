@@ -12,6 +12,17 @@
 
 
     <dependencies>
+        <!-- Spring security-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+        <!-- 第三方认证 OAuth2-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
+        </dependency>
+
         <!-- nacos -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

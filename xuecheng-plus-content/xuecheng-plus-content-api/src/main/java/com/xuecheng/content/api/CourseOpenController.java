@@ -19,14 +19,21 @@ import javax.annotation.Resource;
  */
 @Api(value = "课程公开查询接口",tags = "课程公开查询接口")
 @RestController
-@RequestMapping("/open")
+@RequestMapping
 public class CourseOpenController {
 
     @Resource
     private CoursePublishService coursePublishService;
 
-    @GetMapping("/course/whole/{courseId}")
+    @GetMapping("/open/course/whole/{courseId}")
     public CoursePreviewDto getPreviewInfo(@PathVariable("courseId") Long courseId) {
+        //获取课程预览信息
+        CoursePreviewDto coursePreviewInfo = coursePublishService.getCoursePreviewInfo(courseId);
+        return coursePreviewInfo;
+    }
+
+    @GetMapping("/course/whole/{courseId}")
+    public CoursePreviewDto getPreviewInfo1(@PathVariable("courseId") Long courseId) {
         //获取课程预览信息
         CoursePreviewDto coursePreviewInfo = coursePublishService.getCoursePreviewInfo(courseId);
         return coursePreviewInfo;

@@ -57,10 +57,11 @@ public class CourseBaseServiceImpl extends ServiceImpl<CourseBaseMapper, CourseB
      * 课程查询
      * @param pageParams 分页参数
      * @param queryCourseParams 查询条件
+     * @param companyId 公司id
      * @return 分页数据
      */
     @Override
-    public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto queryCourseParams) {
+    public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto queryCourseParams, Long companyId) {
 
         // 分页参数
         IPage<CourseBase> page = new Page<>(pageParams.getPageNo(), pageParams.getPageSize());
@@ -77,7 +78,8 @@ public class CourseBaseServiceImpl extends ServiceImpl<CourseBaseMapper, CourseB
         String publishStatus = queryCourseParams.getPublishStatus();
         queryWrapper.eq(StringUtils.isNotBlank(publishStatus),CourseBase::getStatus, publishStatus);
 
-
+        // 根据公司id 查询课程
+        queryWrapper.eq(companyId != null,CourseBase::getCompanyId, companyId);
         //E page 分页参数, @Param("ew") Wrapper<T> queryWrapper 查询条件
         IPage<CourseBase> pageResult = courseBaseMapper.selectPage(page, queryWrapper);
 

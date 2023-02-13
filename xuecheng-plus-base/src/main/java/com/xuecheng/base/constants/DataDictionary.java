@@ -73,14 +73,28 @@ public class DataDictionary {
     public static final String PAYMENT_TYPE_ZFB = "603002";
 
 
-    // 选课状态
-    public static final String COURSE_SELECTION_SUCCESS = "701001";
-    public static final String COURSE_SELECTION_NOT_PAY = "701002";
+    // 选课类型 [{"code":"700001","desc":"免费课程"},{"code":"700002","desc":"收费课程"}]
+    public static final String COURSE_SELECTION_TYPE_FREE = "700001";
+    public static final String COURSE_SELECTION_TYPE_NOT_FREE = "700002";
 
 
-    // 选课学习资格
+    // 选课状态 [{"code":"701001","desc":"选课成功"},{"code":"701002","desc":"待支付"}]
+    public static final String COURSE_SELECTION_STATUS_SUCCESS = "701001";
+    public static final String COURSE_SELECTION_STATUS_NOT_PAY = "701002";
+
+
+    // 选课学习资格  [{"code":"702001","desc":"正常学习"},{"code":"702002","desc":"没有选课或选课后没有支付"},{"code":"702003","desc":"已过期需要申请续期或重新支付"}]
+    /**
+     * 正常学习
+     */
     public static final String STUDY_NORMAL = "702001";
+    /**
+     * 没有选课或选课后没有支付
+     */
     public static final String STUDY_NOCOURSE = "702002";
+    /**
+     * 已过期需要申请续期或重新支付
+     */
     public static final String STUDY_OVERDUE = "702003";
 
 }
