@@ -39,7 +39,7 @@ public class DataDictionary {
     public static final String COURSE_PATTERN_LIVE = "200003";
     public static final String COURSE_PATTERN_RECOVERED = "200002";
 
-    // 订单交易类型状态
+    // 订单交易类型状态 [{"code":"600001","desc":"未支付"},{"code":"600002","desc":"已支付"},{"code":"600003","desc":"已关闭"},{"code":"600004","desc":"已退款"},{"code":"600005","desc":"已完成"}]
     public static final String ORDER_PAY = "600002";
     public static final String ORDER_NOT_PAY = "600001";
     public static final String ORDER_CLOSE = "600003";
@@ -57,18 +57,18 @@ public class DataDictionary {
     public static final String MESSAGE_SUCCESS = "003002";
 
 
-    // 支付记录交易状态
+    // 支付记录交易状态 [{"code":"601001","desc":"未支付"},{"code":"601002","desc":"已支付"},{"code":"601003","desc":"已退款"}]
     public static final String PAYMENT_PAY = "601002";
     public static final String PAYMENT_NOT_PAY = "601001";
     public static final String PAYMENT_REFUND = "601003";
 
 
-    // 业务订单类型
+    // 业务订单类型 [{"code":"60201","desc":"购买课程"},{"code":"60202","desc":"学习资料"}]
     public static final String ORDER_TYPE_COURSE = "60201";
     public static final String ORDER_TYPE_DATA = "60202";
 
 
-    // 第三方支付渠道编号
+    // 第三方支付渠道编号 [{"code":"603001","desc":"微信支付"},{"code":"603002","desc":"支付宝"}]
     public static final String PAYMENT_TYPE_WEIXIN = "603001";
     public static final String PAYMENT_TYPE_ZFB = "603002";
 

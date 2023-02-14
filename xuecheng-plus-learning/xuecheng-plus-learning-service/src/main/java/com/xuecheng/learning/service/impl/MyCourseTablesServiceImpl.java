@@ -184,8 +184,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         List<XcChooseCourse> xcChooseCourses = xcChooseCourseMapper.selectList(queryWrapper);
         if (xcChooseCourses != null && xcChooseCourses.size()>0) {
             // 选课记录表有记录，不允许重复添加，直接返回
-            XueChengPlusException.exce("已经添加选课，无需再次添加");
-            // return xcChooseCourses.get(0);
+            // XueChengPlusException.exce("已经添加选课，无需再次添加");
+            return xcChooseCourses.get(0);
         }
         // 向选课记录表 xc_choose_course，添加选课记录信息
         XcChooseCourse xcChooseCourse = new XcChooseCourse();
@@ -272,8 +272,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
                 .eq(XcChooseCourse::getStatus, COURSE_SELECTION_STATUS_NOT_PAY);//待支付
         List<XcChooseCourse> xcChooseCourses = xcChooseCourseMapper.selectList(queryWrapper);
         if (xcChooseCourses != null && xcChooseCourses.size()>0) {
-            XueChengPlusException.exce("已经添加选课，无需再次添加");
-            // return xcChooseCourses.get(0);
+            // XueChengPlusException.exce("已经添加选课，无需再次添加");
+            return xcChooseCourses.get(0);
         }
 
         XcChooseCourse xcChooseCourse = new XcChooseCourse();
