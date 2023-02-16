@@ -64,4 +64,25 @@ public interface CoursePublishService extends IService<CoursePublish> {
      * @return 课程发布表信息
      */
     CoursePublish getCoursePublish(Long courseId);
+
+    /**
+     * 利用redis 进行缓存优化-查询课程发布信息
+     * @param courseId 课程id
+     * @return 课程发布信息
+     */
+    CoursePublish getCoursePublishCache(Long courseId);
+
+    /**
+     * 加jvm本地锁，来防止各种问题
+     * @param courseId 课程id
+     * @return 课程发布信息
+     */
+    public CoursePublish getCoursePublishCache2(Long courseId);
+
+    /**
+     * 使用redisson 加分布式锁
+     * @param courseId 课程id
+     * @return 课程发布信息
+     */
+    public CoursePublish getCoursePublishCache3(Long courseId);
 }

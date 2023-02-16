@@ -4,6 +4,7 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @description 消息队列配置
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Bean;
  * @date 2022/10/4 22:25
  * @version 1.0
  */
-// @Configuration
+@Configuration
 public class PayNotifyConfig {
 
   //交换机

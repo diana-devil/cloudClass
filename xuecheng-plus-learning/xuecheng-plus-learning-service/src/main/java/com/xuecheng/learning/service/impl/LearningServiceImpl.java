@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.xuecheng.base.constants.DataDictionary.STUDY_NORMAL;
+import static com.xuecheng.base.constants.DataDictionary.STUDY_OVERDUE;
+
 /**
  * @description 学习过程管理service接口
  * @author Mr.M
@@ -43,6 +46,14 @@ public class LearningServiceImpl implements LearningService {
     @Autowired
     XcLearnRecordMapper learnRecordMapper;
 
+    /**
+     * 获取 视频
+     * @param userId 用户id
+     * @param courseId 课程id
+     * @param teachplanId 课程计划id
+     * @param mediaId 视频文件id
+     * @return
+     */
   @Override
   public RestResponse<String> getVideo(String userId,Long courseId,Long teachplanId, String mediaId) {
       //查询课程信息
@@ -50,8 +61,9 @@ public class LearningServiceImpl implements LearningService {
       if(coursepublish==null){
           XueChengPlusException.exce("课程信息不存在");
       }
+
       //校验学习资格
-      //判断是否是试学课程
+      //判断是否是试学课程 -- 不需要判断是否登陆；不需要判断是否有资格
       List<TeachplanDto> teachplans = JSON.parseArray(coursepublish.getTeachplan(),TeachplanDto.class);
       //试学视频直接返回视频地址
       if(isTeachplanPreview(teachplanId,teachplans)){
@@ -66,15 +78,15 @@ public class LearningServiceImpl implements LearningService {
           XcCourseTablesDto xcCourseTablesDto = myCourseTablesService.getLeanringStatus(userId, courseId);
           //学习资格状态 [{"code":"702001","desc":"正常学习"},{"code":"702002","desc":"没有选课或选课后没有支付"},{"code":"702003","desc":"已过期需要申请续期或重新支付"}]
           String learnStatus = xcCourseTablesDto.getLearnStatus();
-          if(learnStatus.equals("702001")){
+          if(learnStatus.equals(STUDY_NORMAL)){ // 正常学习
               saveLearnRecord(userId,coursepublish,teachplanId);//保存学习记录
               return mediaServiceClient.getPlayUrlByMediaId(mediaId);
-          }else if(learnStatus.equals("702003")){
-              RestResponse.validfail("您的选课已过期需要申请续期或重新支付");
+          }else if(learnStatus.equals(STUDY_OVERDUE)){ // 已过期需要申请续期或重新支付
+              return RestResponse.validfail("您的选课已过期需要申请续期或重新支付");
           }
       }
 
-      //未登录或未选课判断是否收费
+      //未登录或未选课 判断是否收费
       String charge = coursepublish.getCharge();
       if(charge.equals("201000")){//免费可以正常学习
           saveLearnRecord(userId,coursepublish,teachplanId);//保存学习记录

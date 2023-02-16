@@ -1,6 +1,7 @@
 package com.xuecheng.learning.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuecheng.base.exception.CommonError;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageResult;
@@ -34,7 +35,7 @@ import static com.xuecheng.base.constants.DataDictionary.*;
  */
 @Slf4j
 @Service
-public class MyCourseTablesServiceImpl implements MyCourseTablesService {
+public class MyCourseTablesServiceImpl extends ServiceImpl<XcChooseCourseMapper, XcChooseCourse> implements MyCourseTablesService {
 
     @Autowired
     XcChooseCourseMapper xcChooseCourseMapper;
@@ -45,8 +46,11 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     @Autowired
     ContentServiceClient contentServiceClient;
 
+    // 代理对象
     @Autowired
     MyCourseTablesServiceImpl myCourseTablesService;
+
+
 
     /**
      *  添加选课 ，-- 更新 选课记录表，更新我的课程表
@@ -124,21 +128,21 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
 
 
     /**
-     * 保存选课状态
+     * 更新 选课状态为 选课成功，并将课程插入 我的课程表
      * @param choosecourseId 选课id
      * @return
      */
     @Override
     public boolean saveChooseCourseStauts(String choosecourseId) {
         XcChooseCourse xcChooseCourse = xcChooseCourseMapper.selectById(choosecourseId);
-        if(xcChooseCourse!=null){
+        if (xcChooseCourse != null){
             String status = xcChooseCourse.getStatus();
-            if(COURSE_SELECTION_STATUS_NOT_PAY.equals(status)){//待支付
+            if (COURSE_SELECTION_STATUS_NOT_PAY.equals(status)){//待支付
                 //更新为选课成功
                 xcChooseCourse.setStatus(COURSE_SELECTION_STATUS_SUCCESS);
                 int update = xcChooseCourseMapper.updateById(xcChooseCourse);
-                //添加到课程表
-                addCourseTabls(xcChooseCourse);
+                //添加到课程表 -- 使用代理对象调用事务方法
+                myCourseTablesService.addCourseTabls(xcChooseCourse);
                 if(update>0){
                     log.debug("收到支付结果通知处理成功,选课记录:{}",xcChooseCourse);
                     return true;
@@ -225,7 +229,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         }
         //查询我的课程表
         XcCourseTables xcCourseTables = getXcCourseTables(xcChooseCourse.getUserId(), xcChooseCourse.getCourseId());
-        if(xcCourseTables!=null){
+
+        if(xcCourseTables != null){
             LocalDateTime validtimeEnd = xcChooseCourse.getValidtimeEnd();
             if(xcCourseTables.getValidtimeEnd().isAfter(validtimeEnd)){
                 //如果我的课程表中的过期时间比新订单的过期时间靠后，不用更新课程表。
@@ -298,7 +303,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
      * @param params 课程表参数
      * @return 分页参数
      */
-    public PageResult<MyCourseTableItemDto> mycourestabls( MyCourseTableParams params){
+    public PageResult<MyCourseTableItemDto> mycourestabls(MyCourseTableParams params){
 
         int page = params.getPage();
         int size = params.getSize();

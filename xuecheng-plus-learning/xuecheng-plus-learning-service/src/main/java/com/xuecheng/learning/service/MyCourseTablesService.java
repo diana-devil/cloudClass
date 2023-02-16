@@ -1,10 +1,13 @@
 package com.xuecheng.learning.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.learning.model.dto.MyCourseTableItemDto;
 import com.xuecheng.learning.model.dto.MyCourseTableParams;
 import com.xuecheng.learning.model.dto.XcChooseCourseDto;
 import com.xuecheng.learning.model.dto.XcCourseTablesDto;
+import com.xuecheng.learning.model.po.XcChooseCourse;
+import com.xuecheng.learning.model.po.XcCourseTables;
 
 /**
  * @description 我的课程表service接口
@@ -12,7 +15,7 @@ import com.xuecheng.learning.model.dto.XcCourseTablesDto;
  * @date 2022/10/2 16:07
  * @version 1.0
  */
-public interface MyCourseTablesService {
+public interface MyCourseTablesService extends IService<XcChooseCourse> {
 
     /**
      * 添加选课
@@ -34,7 +37,7 @@ public interface MyCourseTablesService {
 
 
     /**
-     * 保存选课状态
+     * 更新 选课状态为 选课成功，并将课程插入 我的课程表
      * @param choosecourseId 选课id
      * @return
      */
@@ -47,5 +50,13 @@ public interface MyCourseTablesService {
      * @return 分页参数
      */
     public PageResult<MyCourseTableItemDto> mycourestabls(MyCourseTableParams params);
+
+
+    /**
+     * 向我的课程表添加 信息
+     * @param xcChooseCourse 我的课表信息
+     * @return
+     */
+    public XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse);
 
 }

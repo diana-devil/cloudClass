@@ -31,7 +31,8 @@ public interface IOrderService extends IService<XcOrders> {
      * @author Mr.M
      * @date 2022/10/20 23:38
      */
-    public XcPayRecord getPayRecordByPayno(String payNo);
+    XcPayRecord getPayRecordByPayno(String payNo);
+
 
     /**
      * 校验支付信息，更新支付状态
@@ -39,8 +40,4 @@ public interface IOrderService extends IService<XcOrders> {
      */
     void saveAliPayStatus(PayStatusDto payStatusDto);
 
-    /**
-     * 主动查询支付结果；并且校验支付信息，更新支付状态
-     */
-    void queryAndSave();
 }

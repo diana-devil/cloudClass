@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.utils.IdWorkerUtils;
 import com.xuecheng.base.utils.QRCodeUtil;
+import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xuecheng.orders.mapper.XcOrdersGoodsMapper;
 import com.xuecheng.orders.mapper.XcOrdersMapper;
 import com.xuecheng.orders.mapper.XcPayRecordMapper;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.xuecheng.base.constants.DataDictionary.*;
+import static com.xuecheng.base.constants.SystemConstants.MESSAGE_TYPE_ORDER;
 
 /**
  * @ClassName OrderServiceImpl
@@ -40,12 +42,17 @@ import static com.xuecheng.base.constants.DataDictionary.*;
 @Service
 public class OrderServiceImpl extends ServiceImpl<XcOrdersMapper, XcOrders> implements IOrderService {
 
+    @Resource
+    private OrderServiceImpl currentProxy;
 
     @Resource
     private XcOrdersGoodsMapper xcOrdersGoodsMapper;
 
     @Resource
     private XcPayRecordMapper payRecordMapper;
+
+    @Resource
+    private MqMessageService mqMessageService;
 
     @Value("${pay.alipay.APP_ID}")
     String APP_ID;
@@ -60,7 +67,7 @@ public class OrderServiceImpl extends ServiceImpl<XcOrdersMapper, XcOrders> impl
     @Override
     public PayRecordDto generatePayCode(AddOrderDto addOrderDto, String userId) {
         // 创建商品订单
-        XcOrders xcOrders = saveXcOrders(userId, addOrderDto);
+        XcOrders xcOrders = currentProxy.saveXcOrders(userId, addOrderDto);
         // 添加支付记录
         XcPayRecord payRecord = createPayRecord(xcOrders);
         // 生成支付二维码
@@ -98,6 +105,7 @@ public class OrderServiceImpl extends ServiceImpl<XcOrdersMapper, XcOrders> impl
     /**
      * 支付宝支付
      * 校验支付信息，更新支付状态
+     * 同时向消息表写入一条记录，用来保证分布式事务
      * @param payStatusDto 支付状态dto
      */
     @Override
@@ -169,6 +177,14 @@ public class OrderServiceImpl extends ServiceImpl<XcOrdersMapper, XcOrders> impl
         boolean bool = update(order_u, new LambdaQueryWrapper<XcOrders>().eq(XcOrders::getId, orderId));
         if (bool) {
             log.info("收到支付通知，更新订单状态成功.付交易流水号:{},支付结果:{},订单号:{},状态:{}", payNo, trade_status, orderId, ORDER_PAY);
+            // 向消息表 写入数据
+            String businessKey1 = orders.getOutBusinessId();
+            String businessKey2 = orders.getOrderType();
+            // String messageType（标记为支付结果通知）,String businessKey1（外部系统业务id-选课表id）
+            // ,String businessKey2(业务订单类型- 购买课程),String businessKey3
+            mqMessageService.addMessage(MESSAGE_TYPE_ORDER, businessKey1, businessKey2, null);
+
+
         } else {
             log.error("收到支付通知，更新订单状态失败.支付交易流水号:{},支付结果:{},订单号:{},状态:{}", payNo, trade_status, orderId, ORDER_PAY);
         }
@@ -255,12 +271,4 @@ public class OrderServiceImpl extends ServiceImpl<XcOrdersMapper, XcOrders> impl
     }
 
 
-    /**
-     * 主动查询支付结果；并且校验支付信息，更新支付状态
-     */
-    @Override
-    public void queryAndSave() {
-
-
-    }
 }

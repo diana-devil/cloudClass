@@ -23,7 +23,11 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -39,8 +43,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static com.xuecheng.base.constants.DataDictionary.*;
+import static com.xuecheng.base.constants.RedisConstants.REDIS_COURSE_PUBLISH;
+import static com.xuecheng.base.constants.RedisConstants.REDIS_LOCK_COURSE_PUBLISH;
 import static com.xuecheng.base.constants.SystemConstants.MESSAGE_TYPE_COURSE;
 
 /**
@@ -79,6 +87,12 @@ public class CoursePublishServiceImpl extends ServiceImpl<CoursePublishMapper, C
 
     @Resource
     private SearchServiceClient searchServiceClient;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
 
     /**
@@ -324,10 +338,133 @@ public class CoursePublishServiceImpl extends ServiceImpl<CoursePublishMapper, C
     @Override
     public CoursePublish getCoursePublish(Long courseId) {
         CoursePublish coursePublish = getById(courseId);
-        if (coursePublish == null) {
-            XueChengPlusException.exce("课程发布信息为空！");
-        }
+        // if (coursePublish == null) {
+        //     XueChengPlusException.exce("课程发布信息为空！");
+        // }
         return coursePublish;
+    }
+
+    /**
+     * 利用redis 进行缓存优化-查询课程发布信息
+     * @param courseId 课程id
+     * @return 课程发布信息
+     */
+    @Override
+    public CoursePublish getCoursePublishCache(Long courseId) {
+        // 先从缓存中查
+        String str = redisTemplate.opsForValue().get(REDIS_COURSE_PUBLISH + courseId);
+        if (StringUtils.isNotBlank(str)) {
+            return  JSON.parseObject(str, CoursePublish.class);
+        }
+        // 缓存中没有从数据库中查，并且将数据存入redis缓存
+        CoursePublish coursePublish = getById(courseId);
+        log.error("==数据库中查询==");
+        // 会发生缓存穿透现象
+        // if (coursePublish != null) {
+        //     // 高并发下 依然会多次查询数据库
+        //     // log.error("==数据库中查询==");
+        //     String coursePublishJson = JSON.toJSONString(coursePublish);
+        //     redisTemplate.opsForValue().set(REDIS_COURSE_PUBLISH + courseId, coursePublishJson, 60, TimeUnit.MINUTES);
+        // }
+
+        // key 解决缓存穿透
+        // -- 1.当数据库数据不存在时，也存入redis，存一个null值; -- 2.布隆过滤器
+        // -- 一定一定要设置一个 较小的过期时间 例如：300s
+        // String coursePublishJson = JSON.toJSONString(coursePublish);
+        // redisTemplate.opsForValue().set(REDIS_COURSE_PUBLISH + courseId, coursePublishJson, 300, TimeUnit.SECONDS);
+
+
+        // key 解决缓存雪崩
+        // -- 1.同一类型的key设置不同的过期时间; -- 2. 使用同步锁或者分布式锁  -- 3.缓存预热
+        // -- 例如：300 + 随机数即可
+        String coursePublishJson = JSON.toJSONString(coursePublish);
+        int ttl = 300 + new Random().nextInt(100); //不同的过期时间
+        redisTemplate.opsForValue().set(REDIS_COURSE_PUBLISH + courseId, coursePublishJson, ttl, TimeUnit.SECONDS);
+
+
+        return coursePublish;
+    }
+
+
+
+    /**
+     * 利用redis 进行缓存优化-查询课程发布信息
+     *  加锁-jvm本地锁 来预防问题
+     * @param courseId 课程id
+     * @return 课程发布信息
+     */
+    @Override
+    public CoursePublish getCoursePublishCache2(Long courseId) {
+        // 先从缓存中查
+        String str = redisTemplate.opsForValue().get(REDIS_COURSE_PUBLISH + courseId);
+        if (StringUtils.isNotBlank(str)) {
+            return  JSON.parseObject(str, CoursePublish.class);
+        }
+        // key 给数据库加锁 -- 当缓存失效的时候，只让一个人来查询数据库
+        // 可以解决 缓存击穿，缓存雪崩问题
+        // 串行执行-- 性能下降；安全；
+        synchronized (this) {
+            // key double check  --- 防止多个线程同时等锁；已经过了上面查询缓存的代码了，仍然会查询多次数据库
+            str = redisTemplate.opsForValue().get(REDIS_COURSE_PUBLISH + courseId);
+            if (StringUtils.isNotBlank(str)) {
+                return  JSON.parseObject(str, CoursePublish.class);
+            }
+            // 缓存中没有从数据库中查，并且将数据存入redis缓存
+            CoursePublish coursePublish = getById(courseId);
+            log.error("==数据库中查询==");
+
+            // 设置不同过期时间，防止缓存雪崩
+            String coursePublishJson = JSON.toJSONString(coursePublish);
+            int ttl = 300 + new Random().nextInt(100); //不同的过期时间
+            redisTemplate.opsForValue().set(REDIS_COURSE_PUBLISH + courseId, coursePublishJson, ttl, TimeUnit.SECONDS);
+
+            return coursePublish;
+        }
+
+    }
+
+
+    /**
+     * 利用redis 进行缓存优化-查询课程发布信息
+     *  利用redisson实现分布式锁 来预防问题
+     * @param courseId 课程id
+     * @return 课程发布信息
+     */
+    public CoursePublish getCoursePublishCache3(Long courseId) {
+        // 先从缓存中查
+        String str = redisTemplate.opsForValue().get(REDIS_COURSE_PUBLISH + courseId);
+        if (StringUtils.isNotBlank(str)) {
+            return  JSON.parseObject(str, CoursePublish.class);
+        }
+        // key 给数据库加 分布式锁 -- 当缓存失效的时候，只让一个人来查询数据库
+        RLock lock = redissonClient.getLock(REDIS_LOCK_COURSE_PUBLISH + courseId);
+        // 线程获取分布式锁
+        lock.lock();
+
+        try {
+            //double check  --- 防止多个线程同时等锁；已经过了上面查询缓存的代码了，仍然会查询多次数据库
+            str = redisTemplate.opsForValue().get(REDIS_COURSE_PUBLISH + courseId);
+            if (StringUtils.isNotBlank(str)) {
+                return  JSON.parseObject(str, CoursePublish.class);
+            }
+            // 缓存中没有从数据库中查，并且将数据存入redis缓存
+            CoursePublish coursePublish = getById(courseId);
+            log.error("==数据库中查询==");
+
+            // 设置不同过期时间，防止缓存雪崩
+            String coursePublishJson = JSON.toJSONString(coursePublish);
+            int ttl = 300 + new Random().nextInt(100); //不同的过期时间
+            redisTemplate.opsForValue().set(REDIS_COURSE_PUBLISH + courseId, coursePublishJson, ttl, TimeUnit.SECONDS);
+
+            return coursePublish;
+        } finally {
+            // 手动释放锁
+            lock.unlock();
+        }
+
+
+
+
     }
 
 

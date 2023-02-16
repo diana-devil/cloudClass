@@ -25,15 +25,13 @@ public class CourseOpenController {
     @Resource
     private CoursePublishService coursePublishService;
 
+    /**
+     * 获取课程预览信息
+     * @param courseId 课程id
+     * @return 课程预览信息 dto
+     */
     @GetMapping("/open/course/whole/{courseId}")
     public CoursePreviewDto getPreviewInfo(@PathVariable("courseId") Long courseId) {
-        //获取课程预览信息
-        CoursePreviewDto coursePreviewInfo = coursePublishService.getCoursePreviewInfo(courseId);
-        return coursePreviewInfo;
-    }
-
-    @GetMapping("/course/whole/{courseId}")
-    public CoursePreviewDto getPreviewInfo1(@PathVariable("courseId") Long courseId) {
         //获取课程预览信息
         CoursePreviewDto coursePreviewInfo = coursePublishService.getCoursePreviewInfo(courseId);
         return coursePreviewInfo;

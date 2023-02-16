@@ -1,10 +1,15 @@
 package com.xuecheng.content.api;
 
+import com.alibaba.fastjson.JSON;
+import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.dto.TeachplanDto;
 import com.xuecheng.content.model.po.CoursePublish;
+import com.xuecheng.content.model.po.CourseTeacher;
 import com.xuecheng.content.service.CoursePublishService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @ClassName CoursePublishController
@@ -69,7 +75,7 @@ public class CoursePublishController {
     }
 
 
-    @ApiOperation("查询课程发布信息")
+    @ApiOperation("查询课程发布信息-- 微服务中调用")
     @ResponseBody
     @GetMapping("/r/coursepublish/{courseId}")
     // 前面加上 /r/ 表示不需要认证授权，供内部微服务调用
@@ -79,6 +85,47 @@ public class CoursePublishController {
     }
 
 
+    @ApiOperation("获取课程发布信息")
+    @ResponseBody
+    @GetMapping("/course/whole/{courseId}")
+    public CoursePreviewDto getCoursePublish(@PathVariable("courseId") Long courseId) {
+        // CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        // 利用redis优化
+        // CoursePublish coursePublish = coursePublishService.getCoursePublishCache(courseId);
+        // CoursePublish coursePublish = coursePublishService.getCoursePublishCache2(courseId);
+        CoursePublish coursePublish = coursePublishService.getCoursePublishCache3(courseId);
+
+        if (coursePublish == null) {
+            return new CoursePreviewDto();
+        }
+
+        // 封装基本信息 和 营销信息
+        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+        BeanUtils.copyProperties(coursePublish, courseBaseInfoDto);
+
+        // 封装教学计划信息-json格式
+        String teachplan = coursePublish.getTeachplan();
+        List<TeachplanDto> teachplanDtos = JSON.parseArray(teachplan, TeachplanDto.class);
+
+        // 封装教师信息-json格式
+        String teachers = coursePublish.getTeachers();
+        List<CourseTeacher> courseTeachers = JSON.parseArray(teachers, CourseTeacher.class);
+
+        // 封装 返回信息
+        CoursePreviewDto coursePreviewDto = new CoursePreviewDto();
+        coursePreviewDto.setCourseBase(courseBaseInfoDto);
+        coursePreviewDto.setTeachplans(teachplanDtos);
+        coursePreviewDto.setCourseTeachers(courseTeachers);
+
+        return coursePreviewDto;
+
+    }
 
 
-}
+
+
+
+
+
+
+    }

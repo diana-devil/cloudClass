@@ -12,4 +12,11 @@ public class SystemConstants {
      * 课程发布 消息表  消息类型
      */
     public static final String MESSAGE_TYPE_COURSE = "course_publish";
+
+    /**
+     * 支付结果 消息表 消息类型
+     */
+    public static final String MESSAGE_TYPE_ORDER = "payresult_notify";
+
+
 }

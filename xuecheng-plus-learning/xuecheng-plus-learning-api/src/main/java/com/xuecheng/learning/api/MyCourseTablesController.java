@@ -62,6 +62,7 @@ public class MyCourseTablesController {
     @ApiOperation("我的课程表")
     @GetMapping("/mycoursetable")
     public PageResult<MyCourseTableItemDto> mycoursetable(MyCourseTableParams params) {
+        // courseType=&sortType=&expiresType=
         //登录用户
         SecurityUtil.XcUser user = SecurityUtil.getUser();
         if(user == null){

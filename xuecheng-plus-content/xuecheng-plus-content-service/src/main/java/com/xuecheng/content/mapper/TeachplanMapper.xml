@@ -54,6 +54,7 @@
             one.orderby        one_orderby,
             one.course_id      one_courseId,
             one.course_pub_id  one_coursePubId,
+            one.is_preview     one_ispreView,
             two.id             two_id,
             two.pname          two_pname,
             two.parentid       two_parentid,
@@ -64,6 +65,7 @@
             two.orderby        two_orderby,
             two.course_id      two_courseId,
             two.course_pub_id  two_coursePubId,
+            two.is_preview     two_ispreView,
             m1.media_fileName mediaFilename,
             m1.id teachplanMeidaId,
             m1.media_id mediaId
